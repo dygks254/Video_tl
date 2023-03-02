@@ -17,7 +17,7 @@ from pathlib import Path
 def parser():
     parse = argparse.ArgumentParser("Transltation video text")
     
-    parse.add_argument("--source"  , type=Path, help="source mp4 video", required=True)
+    parse.add_argument("--source"  , type=str, help="source mp4 video", required=True)
     parse.add_argument("--out_file", type=str, help="Translated file", default="")
     return parse
 
@@ -29,7 +29,7 @@ def get_large_audio_transcription(path2):
   sound = AudioSegment.from_wav(path2)  
   
   chunks = split_on_silence(sound,
-    min_silence_len = 1000,
+    min_silence_len = 500,
     silence_thresh = sound.dBFS-14,
     keep_silence=500,
   )
@@ -66,14 +66,15 @@ def get_large_audio_transcription(path2):
 if __name__ == '__main__':
   args = parser().parse_args()
   
-  
   folder_name = "build"
   if os.path.isdir(folder_name):
     import shutil
     shutil.rmtree(folder_name, ignore_errors=True)  
   os.mkdir(folder_name)
   
-  videoclip = VideoFileClip(str(args.source))
+  print(args.source.replace("!TM_","\ "))
+  
+  videoclip = VideoFileClip(args.source.replace("!TM_"," "))
   videoclip.audio.write_audiofile("build/test.wav",codec='pcm_s16le')
   
   str_source, str_trans = get_large_audio_transcription("build/test.wav")
@@ -87,5 +88,3 @@ if __name__ == '__main__':
   with open(f"build_trans/{output_file_name}_ko.txt",'w') as f_o:
     f_o.write(str_trans)
   
-  # print(str_source)
-  # print(str_trans)
