@@ -1,7 +1,7 @@
 THISDIR = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 SOURCE ?= ${THISDIR}
-TMP_FILELIST = ${wildcard ${SOURCE}/*.mp4}
+#TMP_FILELIST = ${wildcard ${SOURCE}/*.mp4}
 TMP_FILELIST = $(shell echo "${wildcard ${SOURCE}/*.mp4}" | sed 's/ /\!TM_/g')
 FILELIST = $(shell echo "${TMP_FILELIST}" |sed 's/mp4\!TM_/mp4 /g')
 
