@@ -27,6 +27,7 @@ def get_large_audio_transcription(path2):
 
   tmp_str_trans = str_trans = str_source = ""
 
+
   ed_time = st_time = 0.000001
   translator = Translator()
 
@@ -39,15 +40,24 @@ def get_large_audio_transcription(path2):
     keep_silence=500,
   )
 
+  # print("aaaaaaaa")
+  # print(chunks[0])
 
-  for i, audio_chunk in enumerate(chunks, start=1):
+  # return 0
+
+  for i, audio_chunk in enumerate(chunks[0], start=1):
     chunk_filename = os.path.join(folder_name, f"chunk{i}.wav")
     audio_chunk.export(chunk_filename, format="wav")
     with sr.AudioFile(chunk_filename) as source:
       audio_listened = r.record(source)
 
       f = sf.SoundFile( chunk_filename )
-      ed_time += (f.frames / f.samplerate)
+      print(chunks[1][i-1])
+      
+      st_time = chunks[1][i-1]['start'] / 1000.0 #(f.frames / f.samplerate)
+      if i == 1:
+        st_time = 0.0001
+      ed_time = chunks[1][i-1]['end'] / 1000.0   #(f.frames / f.samplerate)
 
       try:
         text = r.recognize_google(audio_listened)
@@ -69,7 +79,6 @@ def get_large_audio_transcription(path2):
         print(chunk_filename, ":", translation.text)
         print( datetime.timedelta(seconds=(f.frames / f.samplerate)))
 
-    st_time += (f.frames / f.samplerate)
 
     tmp_str_trans += text
 
@@ -78,23 +87,25 @@ def get_large_audio_transcription(path2):
 if __name__ == '__main__':
   args = parser().parse_args()
 
-  folder_name = "build"
+  file_name = str(args.source).split("/")[-1].replace(".","")
+
+  folder_name = f"build/{file_name}"
   if os.path.isdir(folder_name):
     import shutil
     shutil.rmtree(folder_name, ignore_errors=True)
-  os.mkdir(folder_name)
+  os.makedirs(folder_name)
 
-  print(args.source.replace("!TM_","\ "))
+  videoclip = VideoFileClip(args.source)
+  videoclip.audio.write_audiofile(f"{folder_name}/test.wav",codec='pcm_s16le')
 
-  videoclip = VideoFileClip(args.source.replace("!TM_"," "))
-  videoclip.audio.write_audiofile("build/test.wav",codec='pcm_s16le')
-
-  str_source, str_trans = get_large_audio_transcription("build/test.wav")
-
+  str_source = str_trans = ""
+  str_source, str_trans = get_large_audio_transcription(f"{folder_name}/test.wav")
 
   if not os.path.isdir("build_trans"):
     os.makedirs("build_trans")
-  output_file_name = str(args.source).split("/")[-1].replace("\ ","")
+  output_file_name = file_name
+  # output_file_name="Module1a_IntroductionandBackground.mp4"
+  print(output_file_name)
   with open(f"build_trans/{output_file_name}_en.txt.srt".replace(" ",""),'w') as f_s:
     f_s.write(str_source)
   with open(f"build_trans/{output_file_name}_ko.txt.srt".replace(" ",""),'w') as f_o:
@@ -102,7 +113,14 @@ if __name__ == '__main__':
 
   if not os.path.isdir("build_video"):
     os.makedirs("build_video")
-  video = ffmpeg.input(args.source.replace("!TM_"," "))
+  # print(args.source.replace("!TM_"," "))
+  video = ffmpeg.input(args.source)
+  # video = ffmpeg.input( "test.video" )
   audio = video.audio
   ffmpeg.concat(video.filter("subtitles", f"build_trans/{output_file_name}_en.txt.srt"), audio, v=1, a=1).output(f"build_video/{output_file_name}_en.mp4".replace(" ","")).run()
-  ffmpeg.concat(video.filter("subtitles", f"build_trans/{output_file_name}_ko.txt.srt"), audio, v=1, a=1).output(f"build_video/{output_file_name}_ko.mp4".replace(" ","")).run()
+  # ffmpeg.concat(video.filter("subtitles", f"build_trans/{output_file_name}_ko.txt.srt"), audio, v=1, a=1, fontsdir = "/usr/share/fonts/truetype/nanum/NanumSquareL.ttf").output(f"build_video/{output_file_name}_ko.mp4".replace(" ","")).run()
+  
+  print("------------------------------------------------")
+  print(f" ffmpeg -i \"{args.source}\" -vf \" subtitles='build_trans/{output_file_name}_ko.txt.srt':fontsdir='/usr/share/fonts/truetype/nanum/NanumSquareL.ttf':force_style='FontName='NanumSquareL'' \" \"build_video/{output_file_name}_ko.mp4\" ")
+  
+  os.system(f" ffmpeg -i \"{args.source}\" -vf \" subtitles='build_trans/{output_file_name}_ko.txt.srt':fontsdir='/usr/share/fonts/truetype/nanum/NanumSquareL.ttf':force_style='FontName='NanumSquareL'' \" \"build_video/{output_file_name}_ko.mp4\" ")
