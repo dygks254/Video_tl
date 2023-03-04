@@ -7,7 +7,7 @@ FILELIST = $(shell echo "${TMP_FILELIST}" |sed 's/mp4\!TM_/mp4 /g')
 
 all: ${FILELIST}
 	@echo "end"
-#	@echo "${FILELIST}"
+	@echo "${FILELIST}"
 
 %.mp4: STARTM
 #	@echo $(shell echo ${@} | sed 's/\!TM_/ /g')
