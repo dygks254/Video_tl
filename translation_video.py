@@ -44,6 +44,7 @@ def get_large_audio_transcription(path2):
   # print(chunks[0])
 
   # return 0
+  text = ""
 
   for i, audio_chunk in enumerate(chunks[0], start=1):
     chunk_filename = os.path.join(folder_name, f"chunk{i}.wav")
