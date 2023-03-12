@@ -39,11 +39,7 @@ def get_large_audio_transcription(path2):
     silence_thresh = sound.dBFS-14,
     keep_silence=500,
   )
-
-  # print("aaaaaaaa")
-  # print(chunks[0])
-
-  # return 0
+  
   text = ""
 
   for i, audio_chunk in enumerate(chunks[0], start=1):
@@ -74,7 +70,7 @@ def get_large_audio_transcription(path2):
         str_source += f"{i}\n{date_st} --> {date_ed}\n{text}\n\n"
 
         translation = translator.translate(text, dest='ko')
-        str_trans += f"{i}\n{date_st} --> {date_ed}\n{translation.text}\n\n"
+        str_trans += f"{i}\n{date_st} --> {date_ed}\n{text}\n{translation.text}\n\n"
 
         print(chunk_filename, ":", text)
         print(chunk_filename, ":", translation.text)
@@ -105,7 +101,6 @@ if __name__ == '__main__':
   if not os.path.isdir("build_trans"):
     os.makedirs("build_trans")
   output_file_name = file_name
-  # output_file_name="Module1a_IntroductionandBackground.mp4"
   print(output_file_name)
   with open(f"build_trans/{output_file_name}_en.txt.srt".replace(" ",""),'w') as f_s:
     f_s.write(str_source)
@@ -114,14 +109,8 @@ if __name__ == '__main__':
 
   if not os.path.isdir("build_video"):
     os.makedirs("build_video")
-  # print(args.source.replace("!TM_"," "))
   video = ffmpeg.input(args.source)
-  # video = ffmpeg.input( "test.video" )
   audio = video.audio
   ffmpeg.concat(video.filter("subtitles", f"build_trans/{output_file_name}_en.txt.srt"), audio, v=1, a=1).output(f"build_video/{output_file_name}_en.mp4".replace(" ","")).run()
-  # ffmpeg.concat(video.filter("subtitles", f"build_trans/{output_file_name}_ko.txt.srt"), audio, v=1, a=1, fontsdir = "/usr/share/fonts/truetype/nanum/NanumSquareL.ttf").output(f"build_video/{output_file_name}_ko.mp4".replace(" ","")).run()
   
-  print("------------------------------------------------")
-  print(f" ffmpeg -i \"{args.source}\" -vf \" subtitles='build_trans/{output_file_name}_ko.txt.srt':fontsdir='/usr/share/fonts/truetype/nanum/NanumSquareL.ttf':force_style='FontName='NanumSquareL'' \" \"build_video/{output_file_name}_ko.mp4\" ")
-  
-  os.system(f" ffmpeg -i \"{args.source}\" -vf \" subtitles='build_trans/{output_file_name}_ko.txt.srt':fontsdir='/usr/share/fonts/truetype/nanum/NanumSquareL.ttf':force_style='FontName='NanumSquareL'' \" \"build_video/{output_file_name}_ko.mp4\" ")
+  os.system(f" ffmpeg -i \"{args.source}\" -vf \" subtitles='build_trans/{output_file_name}_ko.txt.srt':fontsdir='/usr/share/fonts/truetype/nanum/NanumSquareL.ttf':force_style='OutlineColour=&H80000000,BorderStyle=4,BackColour=&H80000000,Outline=0,Shadow=0,MarginV=15,Fontname=Arial,Fontsize=10,Alignment=2,FontName='NanumSquareL'' \" \"build_video/{output_file_name}_ko.mp4\" ")
