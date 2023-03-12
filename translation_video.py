@@ -16,6 +16,9 @@ import ffmpeg
 import argparse
 from pathlib import Path
 
+_WORKSPACE = os.path.dirname(os.path.realpath(__file__))
+
+
 def parser():
     parse = argparse.ArgumentParser("Transltation video text")
 
@@ -74,8 +77,7 @@ def get_large_audio_transcription(path2):
 
         print(chunk_filename, ":", text)
         print(chunk_filename, ":", translation.text)
-        print( datetime.timedelta(seconds=(f.frames / f.samplerate)))
-
+        print(datetime.timedelta(seconds=(f.frames / f.samplerate)))
 
     tmp_str_trans += text
 
@@ -95,13 +97,11 @@ if __name__ == '__main__':
   videoclip = VideoFileClip(args.source)
   videoclip.audio.write_audiofile(f"{folder_name}/test.wav",codec='pcm_s16le')
 
-  str_source = str_trans = ""
   str_source, str_trans = get_large_audio_transcription(f"{folder_name}/test.wav")
 
   if not os.path.isdir("build_trans"):
     os.makedirs("build_trans")
   output_file_name = file_name
-  print(output_file_name)
   with open(f"build_trans/{output_file_name}_en.txt.srt".replace(" ",""),'w') as f_s:
     f_s.write(str_source)
   with open(f"build_trans/{output_file_name}_ko.txt.srt".replace(" ",""),'w') as f_o:
@@ -113,4 +113,4 @@ if __name__ == '__main__':
   audio = video.audio
   ffmpeg.concat(video.filter("subtitles", f"build_trans/{output_file_name}_en.txt.srt"), audio, v=1, a=1).output(f"build_video/{output_file_name}_en.mp4".replace(" ","")).run()
   
-  os.system(f" ffmpeg -i \"{args.source}\" -vf \" subtitles='build_trans/{output_file_name}_ko.txt.srt':fontsdir='/usr/share/fonts/truetype/nanum/NanumSquareL.ttf':force_style='OutlineColour=&H80000000,BorderStyle=4,BackColour=&H80000000,Outline=0,Shadow=0,MarginV=15,Fontname=Arial,Fontsize=10,Alignment=2,FontName='NanumSquareL'' \" \"build_video/{output_file_name}_ko.mp4\" ")
+  os.system(f" ffmpeg -i \"{args.source}\" -vf \" subtitles='build_trans/{output_file_name}_ko.txt.srt':fontsdir='{_WORKSPACE}/font_pkg/나눔스퀘어/NanumFontSetup_TTF_SQUARE/NanumSquareL.ttf':force_style='OutlineColour=&H80000000,BorderStyle=4,BackColour=&H80000000,Outline=0,Shadow=0,MarginV=15,Fontname=Arial,Fontsize=10,Alignment=2,FontName='NanumSquareL'' \" \"build_video/{output_file_name}_ko.mp4\" ")
