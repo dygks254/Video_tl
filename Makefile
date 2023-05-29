@@ -5,7 +5,7 @@ SOURCE ?= ${THISDIR}
 TMP_FILELIST = $(shell echo "${wildcard ${SOURCE}/*.mp4}" | sed 's/ /\!TM_/g')
 FILELIST = $(shell echo "${TMP_FILELIST}" |sed 's/mp4\!TM_/mp4 /g')
 
-all: SETTING_TITLE ${FILELIST}
+all: ${FILELIST}
 	@echo "end"
 	@echo "${FILELIST}"
 
@@ -15,6 +15,9 @@ all: SETTING_TITLE ${FILELIST}
 
 STARTM:
 	@echo "Start"
+
+SET:
+	@find ${SOURCE}  -type f -exec bash -c 'mv "$0" "${0// /_}"' {} \;
 
 SETTING_TITLE:
 	echo "${SOURCE}"
